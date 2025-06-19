@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Click Tata's Heart</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: linear-gradient(to bottom right, #cbe9ff, #a3ccff);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      overflow: hidden;
+      position: relative;
+      height: 100vh;
+    }
+    .sky {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0; left: 0;
+      overflow: visible;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .cloud {
+      position: absolute;
+      background-image: url('cloud.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+      pointer-events: none;
+      animation-name: floatRight;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      z-index: 0;
+    }
+    @keyframes floatRight {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(120vw); }
+    }
+    h1 {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: #ff3b3b;
+      font-size: 3rem;
+      margin-top: 30px;
+      text-shadow: 2px 2px #fff;
+    }
+    #score, #timer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      font-size: 1.4rem;
+      margin: 10px auto;
+      padding: 10px 20px;
+      border-radius: 20px;
+      background-color: #fff6f0;
+      border: 2px dashed #ffcc70;
+      color: #d62828;
+      box-shadow: 0 0 10px #ffd6a5;
+      width: fit-content;
+    }
+    .heart {
+      width: 90px;
+      height: 90px;
+      background: url('heart.png') no-repeat center center;
+      background-size: contain;
+      position: absolute;
+      cursor: pointer;
+      animation: float 2s infinite ease-in-out;
+      z-index: 3;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .sparkle {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background-color: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #fff, 0 0 20px #ffc0cb;
+      opacity: 0.8;
+      animation: sparkle 0.7s ease-out forwards;
+      pointer-events: none;
+      z-index: 2;
+    }
+    @keyframes sparkle {
+      0% { transform: scale(1) translateY(0); opacity: 0.9; }
+      100% { transform: scale(0.5) translateY(-30px); opacity: 0; }
+    }
+    #endMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffe5ec;
+      border: 3px solid #ff3b3b;
+      color: #7b2cbf;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #ff99c8;
+      text-align: center;
+      display: none;
+      z-index: 5;
+    }
+    #endMessage h2 {
+      margin: 0 0 20px 0;
+      font-size: 1.8rem;
+      color: #e63946;
+    }
+    #endMessage button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #ff3b3b;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #endMessage button:hover {
+      background-color: #d62828;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sky" id="sky"></div>
+
+  <h1>Click Tata's Heart</h1>
+  <div id="timer">Time left: 30s</div>
+  <div id="score">Score: 0</div>
+  <div class="heart" id="heart"></div>
+
+  <div id="endMessage">
+    <h2>Game Over</h2>
+    <p>Your final score is <span id="finalScore">0</span>. Thanks for playing!</p>
+    <button onclick="restartGame()">Play Again</button>
+  </div>
+
+  <script>
+    const heart = document.getElementById("heart");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const endMessage = document.getElementById("endMessage");
+    const finalScore = document.getElementById("finalScore");
+    const sky = document.getElementById("sky");
+
+    let score = 0;
+    let timeLeft = 30;
+    let gameOver = false;
+    let timerInterval;
+
+    function moveHeart() {
+      const maxX = window.innerWidth - 90;
+      const maxY = window.innerHeight - 90;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+    }
+
+    function sparkleEffect(x, y) {
+      const sparkle = document.createElement("div");
+      sparkle.classList.add("sparkle");
+      sparkle.style.left = `${x - 7}px`;
+      sparkle.style.top = `${y - 7}px`;
+      document.body.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 700);
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      timerDisplay.textContent = `Time left: ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        endGame();
+      }
+    }
+
+    function endGame() {
+      gameOver = true;
+      heart.style.display = "none";
+      finalScore.textContent = score;
+      endMessage.style.display = "block";
+    }
+
+    function restartGame() {
+      score = 0;
+      timeLeft = 30;
+      gameOver = false;
+      scoreDisplay.textContent = "Score: 0";
+      timerDisplay.textContent = "Time left: 30s";
+      endMessage.style.display = "none";
+      heart.style.display = "block";
+      moveHeart();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    heart.addEventListener("click", (e) => {
+      if (gameOver) return;
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+      moveHeart();
+      sparkleEffect(e.clientX, e.clientY);
+    });
+
+    function createClouds() {
+      for (let i = 0; i < 15; i++) { // aumentei de 6 para 15 nuvens
+        const cloud = document.createElement("div");
+        cloud.className = "cloud";
+        cloud.style.top = `${30 + i * 40}px`;
+        cloud.style.left = `${-200 - i * 200}px`;
+        cloud.style.width = '180px';
+        cloud.style.height = '110px';
+        cloud.style.animationDuration = `${20 + (i % 6) * 5}s`;
+        cloud.style.animationDelay = `${i * 3}s`;
+        sky.appendChild(cloud);
+      }
+    }
+
+    moveHeart();
+    createClouds();
+    timerInterval = setInterval(updateTimer, 1000);
+  </script>
+
+</body>
+</html>
